@@ -1,0 +1,28 @@
+services:
+  scripta:
+    build: .
+    image: scripta:latest
+    restart: unless-stopped
+    ports:
+      - '8787:8787'
+    environment:
+      NODE_ENV: production
+      PORT: 8787
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-latest}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-12}
+      RATE_LIMIT_PER_MIN: ${RATE_LIMIT_PER_MIN:-30}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      MOCK_GEMINI: ${MOCK_GEMINI:-1}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:8787/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 4s
+      retries: 3
+      start_period: 10s

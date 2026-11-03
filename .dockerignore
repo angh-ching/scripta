@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-server
+coverage
+playwright-report
+test-results
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.DS_Store
+*.log
+Dockerfile
+docker-compose.yml
+README.md

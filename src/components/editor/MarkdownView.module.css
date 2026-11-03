@@ -1,0 +1,137 @@
+.markdown {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.fallback {
+  padding: 22px 0;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.markdown > *:first-child {
+  margin-top: 0;
+}
+
+.markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  margin: 1.1em 0 0.35em;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 480;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.markdown h1 {
+  font-size: 1.8em;
+}
+
+.markdown h2 {
+  font-size: 1.5em;
+}
+
+.markdown h3 {
+  font-size: 1.22em;
+}
+
+.markdown p {
+  margin: 0 0 0.8em;
+}
+
+.markdown ul,
+.markdown ol {
+  margin: 0.4em 0 0.9em;
+  padding-left: 1.4em;
+}
+
+.markdown li {
+  margin-bottom: 0.25em;
+}
+
+.markdown li::marker {
+  color: var(--accent);
+}
+
+.markdown blockquote {
+  margin: 0.8em 0;
+  padding: 0.2em 0 0.2em 1em;
+  border-left: 2px solid var(--accent);
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 1.08em;
+}
+
+.markdown code {
+  padding: 0.12em 0.3em;
+  border-radius: 3px;
+  background: var(--paper-deep);
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+}
+
+.markdown pre {
+  margin: 0.8em 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-deep);
+}
+
+.markdown pre code {
+  padding: 0;
+  background: transparent;
+  font-size: 0.82em;
+  line-height: 1.6;
+}
+
+.markdown table {
+  width: 100%;
+  margin: 0.85em 0;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.markdown th,
+.markdown td {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.markdown th {
+  background: var(--paper-deep);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.markdown hr {
+  margin: 1.4em 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.markdown a {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+.markdown img {
+  border-radius: var(--radius-sm);
+}

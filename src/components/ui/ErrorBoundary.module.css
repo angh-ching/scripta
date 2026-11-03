@@ -1,0 +1,81 @@
+.fallback {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 0, var(--paper-deep), transparent 55%),
+    var(--paper);
+}
+
+.card {
+  width: min(470px, 100%);
+  padding: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow-md);
+}
+
+.kicker {
+  margin-bottom: 13px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.card h1 {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 420;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.card p {
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 23px;
+}
+
+.primary,
+.secondary {
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.primary {
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.primary:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.secondary {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink-soft);
+}
+
+.secondary:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
