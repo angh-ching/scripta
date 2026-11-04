@@ -1,16 +1,17 @@
 import { createApp } from './app'
-import { loadConfig, healthMode } from './config'
+import { healthMode, loadConfig, providerKeyName, providerLabel } from './config'
 import { createLogger } from './logger'
 
 const config = loadConfig()
 const logger = createLogger(config.logLevel)
 const app = createApp(config)
 const mode = healthMode(config)
+const keyName = providerKeyName(config.provider)
 
 if (mode === 'unconfigured') {
-  logger.warn('GEMINI_API_KEY is missing. OCR will return a setup error until it is added.')
+  logger.warn(`${keyName} is missing. OCR will return a setup error until it is added.`)
 } else if (mode === 'mock') {
-  logger.warn('Demo mode active: OCR and translation are simulated. Set GEMINI_API_KEY for live scans.')
+  logger.warn('Demo mode active: OCR and translation are simulated. Add an API key for live scans.')
 }
 
 const server = app.listen(config.port, () => {
@@ -18,6 +19,7 @@ const server = app.listen(config.port, () => {
     {
       port: config.port,
       mode,
+      provider: providerLabel(config.provider),
       model: config.model,
       maxUploadMb: config.maxUploadMb,
     },

@@ -3,11 +3,27 @@ import dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 dotenv.config({ path: '.env' })
 
+export type AiProvider = 'gemini' | 'openrouter'
+
+export const DEFAULT_OPENROUTER_MODEL = 'nvidia/nemotron-3.5-super-vl:free'
+export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash'
+export const DEFAULT_OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+
 export interface ServerConfig {
   nodeEnv: string
   port: number
+  provider: AiProvider
+  /** Key for the selected provider. */
   apiKey: string
+  /** Model id for the selected provider. */
   model: string
+  geminiApiKey: string
+  geminiModel: string
+  openrouterApiKey: string
+  openrouterModel: string
+  openrouterBaseUrl: string
+  /** True when AI_PROVIDER was set explicitly rather than auto-detected. */
+  providerExplicit: boolean
   mock: boolean
   maxUploadMb: number
   rateLimitPerMin: number
@@ -30,17 +46,41 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value))
 }
 
+function parseProvider(value: string | undefined): AiProvider | null {
+  const normalized = value?.trim().toLowerCase()
+  return normalized === 'gemini' || normalized === 'openrouter' ? normalized : null
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const nodeEnv = env.NODE_ENV ?? 'development'
-  const apiKey = env.GEMINI_API_KEY?.trim() ?? ''
+  const geminiApiKey = env.GEMINI_API_KEY?.trim() ?? ''
+  const openrouterApiKey = env.OPENROUTER_API_KEY?.trim() ?? ''
+  const explicitProvider = parseProvider(env.AI_PROVIDER)
+  const provider: AiProvider = explicitProvider ?? (openrouterApiKey ? 'openrouter' : 'gemini')
+  const apiKey = provider === 'openrouter' ? openrouterApiKey : geminiApiKey
   const explicitMock = parseBoolean(env.MOCK_GEMINI)
-  const mock = explicitMock || (!apiKey && nodeEnv !== 'production')
+  // Demo mode is a development convenience. An explicitly selected provider
+  // with no key should report the setup problem instead of quietly simulating.
+  const mock = explicitMock || (!apiKey && nodeEnv !== 'production' && explicitProvider === null)
 
   return {
     nodeEnv,
     port: clamp(parseNumber(env.PORT, 8787), 1, 65_535),
+    provider,
     apiKey,
-    model: env.GEMINI_MODEL?.trim() || 'gemini-flash-latest',
+    model:
+      provider === 'openrouter'
+        ? env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL
+        : env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
+    geminiApiKey,
+    geminiModel: env.GEMINI_MODEL?.trim() || DEFAULT_GEMINI_MODEL,
+    openrouterApiKey,
+    openrouterModel: env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL,
+    openrouterBaseUrl: (env.OPENROUTER_BASE_URL?.trim() || DEFAULT_OPENROUTER_BASE_URL).replace(
+      /\/+$/,
+      '',
+    ),
+    providerExplicit: explicitProvider !== null,
     mock,
     maxUploadMb: clamp(parseNumber(env.MAX_UPLOAD_MB, 12), 1, 25),
     rateLimitPerMin: clamp(parseNumber(env.RATE_LIMIT_PER_MIN, 30), 1, 300),
@@ -60,4 +100,12 @@ export function healthMode(config: ServerConfig): HealthMode {
 
 export function ocrModelLabel(config: ServerConfig): string {
   return config.mock ? 'demo-reader' : config.model
+}
+
+export function providerLabel(provider: AiProvider): string {
+  return provider === 'openrouter' ? 'OpenRouter' : 'Gemini'
+}
+
+export function providerKeyName(provider: AiProvider): string {
+  return provider === 'openrouter' ? 'OPENROUTER_API_KEY' : 'GEMINI_API_KEY'
 }

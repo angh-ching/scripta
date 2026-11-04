@@ -8,8 +8,12 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8787
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-nvidia/nemotron-3.5-super-vl:free}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-flash-latest}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-12}
       RATE_LIMIT_PER_MIN: ${RATE_LIMIT_PER_MIN:-30}
       LOG_LEVEL: ${LOG_LEVEL:-info}

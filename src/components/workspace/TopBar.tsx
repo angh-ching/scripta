@@ -26,6 +26,7 @@ export function TopBar({
 }: TopBarProps) {
   const demo = health?.mode === 'mock'
   const unconfigured = health?.mode === 'unconfigured'
+  const keyName = health?.provider === 'openrouter' ? 'OPENROUTER_API_KEY' : 'GEMINI_API_KEY'
 
   return (
     <header className={styles.topbar}>
@@ -47,12 +48,15 @@ export function TopBar({
           <span className={styles.tagline}>handwriting, digitized</span>
         </div>
         {demo ? (
-          <span className={styles.demoPill} title="OCR and translation are simulated. Add a Gemini API key for live scans.">
+          <span
+            className={styles.demoPill}
+            title={`OCR and translation are simulated. Add ${keyName} for live scans.`}
+          >
             demo
           </span>
         ) : null}
         {unconfigured ? (
-          <span className={styles.warnPill} title="GEMINI_API_KEY is missing from .env.local">
+          <span className={styles.warnPill} title={`${keyName} is missing from .env.local`}>
             key needed
           </span>
         ) : null}
@@ -69,7 +73,13 @@ export function TopBar({
             <span className={styles.actionLabel}>New scan</span>
           </Button>
         ) : null}
-        <Button variant="ghost" size="sm" icon={<History size={15} />} onClick={onHistory} aria-label="History">
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<History size={15} />}
+          onClick={onHistory}
+          aria-label="History"
+        >
           <span className={styles.actionLabel}>History</span>
         </Button>
         <Button

@@ -172,6 +172,7 @@ export type TranslateStreamEvent = z.infer<typeof translateStreamEventSchema>
 export const healthSchema = z.object({
   ok: z.boolean(),
   mode: z.enum(['live', 'mock', 'unconfigured']),
+  provider: z.enum(['gemini', 'openrouter']).optional(),
   model: z.string(),
   maxUploadMb: z.number(),
   version: z.string(),

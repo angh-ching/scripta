@@ -2,7 +2,13 @@ import { setTimeout as delay } from 'node:timers/promises'
 import type { Block, OcrPage } from '../shared/contracts'
 import { languageName } from '../shared/languages'
 import { SAMPLE_NOTE_BLOCKS, SAMPLE_NOTE_TITLE, SAMPLE_TRANSLATIONS } from '../shared/sample'
-import type { OcrHandlers, OcrInput, OcrResult, TranslationInput, TranslationResult } from './gemini'
+import type {
+  OcrHandlers,
+  OcrInput,
+  OcrResult,
+  TranslationInput,
+  TranslationResult,
+} from './ai-types'
 
 function mockPage(pageId: string): OcrPage {
   const blocks: Block[] = SAMPLE_NOTE_BLOCKS.map((block, index) => ({
@@ -53,8 +59,7 @@ export async function mockTranslation(
     const translated =
       input.target === 'en'
         ? block.text
-        : sample?.[index] ??
-          `[${targetLabel} demo translation]\n\n${block.text}`
+        : (sample?.[index] ?? `[${targetLabel} demo translation]\n\n${block.text}`)
     return { id: block.id, text: translated }
   })
 

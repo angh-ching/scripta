@@ -6,12 +6,17 @@ import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import multer from 'multer'
 import pinoHttp from 'pino-http'
-import { apiError, translateRequestSchema, type OcrStreamEvent, type TranslateStreamEvent } from '../shared/contracts'
+import {
+  apiError,
+  translateRequestSchema,
+  type OcrStreamEvent,
+  type TranslateStreamEvent,
+} from '../shared/contracts'
 import type { ServerConfig } from './config'
 import { healthMode, ocrModelLabel } from './config'
 import { AppError, isAbortError, mapUpstreamError } from './errors'
 import { processUploadedImage } from './image'
-import { streamOcr, streamTranslation } from './gemini'
+import { streamOcr, streamTranslation } from './ai'
 import { mockOcr, mockTranslation } from './mock'
 import { createLogger } from './logger'
 
@@ -37,7 +42,12 @@ function uploadError(error: unknown): AppError {
   if (error instanceof AppError) return error
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
-      return new AppError('TOO_LARGE', 'That image is too large. Use a photo under the upload limit.', 413, false)
+      return new AppError(
+        'TOO_LARGE',
+        'That image is too large. Use a photo under the upload limit.',
+        413,
+        false,
+      )
     }
     return new AppError('INVALID_IMAGE', 'The upload could not be accepted.', 400, false)
   }
@@ -52,7 +62,9 @@ export function createApp(config: ServerConfig) {
     limits: { fileSize: config.maxUploadMb * 1024 * 1024, files: 1, fields: 8 },
     fileFilter: (_req, file, callback) => {
       if (!file.mimetype.startsWith('image/')) {
-        callback(new AppError('INVALID_IMAGE', 'Choose an image file (JPG, PNG, or WebP).', 400, false))
+        callback(
+          new AppError('INVALID_IMAGE', 'Choose an image file (JPG, PNG, or WebP).', 400, false),
+        )
         return
       }
       callback(null, true)
@@ -94,7 +106,11 @@ export function createApp(config: ServerConfig) {
     legacyHeaders: false,
     handler: (_req, res) => {
       res.status(429).json({
-        error: apiError('RATE_LIMITED', 'Too many scans in a minute. Take a breath, then retry.', true),
+        error: apiError(
+          'RATE_LIMITED',
+          'Too many scans in a minute. Take a breath, then retry.',
+          true,
+        ),
       })
     },
   })
@@ -104,6 +120,7 @@ export function createApp(config: ServerConfig) {
     res.json({
       ok: mode !== 'unconfigured',
       mode,
+      provider: config.provider,
       model: ocrModelLabel(config),
       maxUploadMb: config.maxUploadMb,
       version: config.version,
@@ -173,7 +190,7 @@ export function createApp(config: ServerConfig) {
           res.end()
           return
         }
-        const mapped = mapUpstreamError(error, Boolean(config.apiKey))
+        const mapped = mapUpstreamError(error, Boolean(config.apiKey), config.provider)
         logger.error({ err: mapped, pageId }, 'ocr stream failed')
         writeEvent(res, { type: 'error', error: mapped.toApiError() })
         res.end()
@@ -225,7 +242,7 @@ export function createApp(config: ServerConfig) {
         res.end()
         return
       }
-      const mapped = mapUpstreamError(error, Boolean(config.apiKey))
+      const mapped = mapUpstreamError(error, Boolean(config.apiKey), config.provider)
       logger.error({ err: mapped }, 'translation stream failed')
       writeEvent(res, { type: 'error', error: mapped.toApiError() })
       res.end()
@@ -262,22 +279,18 @@ export function createApp(config: ServerConfig) {
     res.status(404).json({ error: apiError('NOT_FOUND', 'Not found.') })
   })
 
-  app.use(
-    (
-      error: unknown,
-      _req: Request,
-      res: Response,
-      _next: express.NextFunction,
-    ) => {
-      const mapped = error instanceof AppError ? error : mapUpstreamError(error, Boolean(config.apiKey))
-      if (mapped.status >= 500) logger.error({ err: mapped }, 'request failed')
-      if (res.headersSent) {
-        res.end()
-        return
-      }
-      res.status(mapped.status).json({ error: mapped.toApiError() })
-    },
-  )
+  app.use((error: unknown, _req: Request, res: Response, _next: express.NextFunction) => {
+    const mapped =
+      error instanceof AppError
+        ? error
+        : mapUpstreamError(error, Boolean(config.apiKey), config.provider)
+    if (mapped.status >= 500) logger.error({ err: mapped }, 'request failed')
+    if (res.headersSent) {
+      res.end()
+      return
+    }
+    res.status(mapped.status).json({ error: mapped.toApiError() })
+  })
 
   return app
 }

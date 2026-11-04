@@ -89,6 +89,44 @@ export const TRANSLATION_RESPONSE_SCHEMA: Schema = {
   propertyOrdering: ['blocks'],
 }
 
+/**
+ * OpenRouter's chat-completions endpoint takes standard JSON Schema, while
+ * @google/genai takes its own Schema shape (uppercase type names, no
+ * additionalProperties). Keep the schema definitions above as the single source
+ * of truth and convert for OpenAI-compatible providers.
+ */
+export function toJsonSchema(schema: Schema): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
+
+  if (typeof schema.type === 'string') {
+    result.type = schema.type.toLowerCase()
+  }
+  if (schema.description) result.description = schema.description
+  if (schema.enum) result.enum = schema.enum
+  if (schema.minimum !== undefined) result.minimum = schema.minimum
+  if (schema.maximum !== undefined) result.maximum = schema.maximum
+  if (schema.minItems !== undefined) result.minItems = Number(schema.minItems)
+  if (schema.maxItems !== undefined) result.maxItems = Number(schema.maxItems)
+
+  if (schema.items) {
+    result.items = toJsonSchema(schema.items)
+  }
+  if (schema.properties) {
+    result.properties = Object.fromEntries(
+      Object.entries(schema.properties).map(([key, value]) => [key, toJsonSchema(value)]),
+    )
+  }
+  if (schema.required) result.required = schema.required
+  if (schema.type === Type.OBJECT || schema.properties) {
+    result.additionalProperties = false
+  }
+
+  return result
+}
+
+export const OCR_JSON_SCHEMA = toJsonSchema(OCR_RESPONSE_SCHEMA)
+export const TRANSLATION_JSON_SCHEMA = toJsonSchema(TRANSLATION_RESPONSE_SCHEMA)
+
 export function buildOcrPrompt(hintLanguage?: string): string {
   const hint =
     hintLanguage && hintLanguage !== 'auto'

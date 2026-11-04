@@ -21,6 +21,8 @@ interface DropzoneProps {
 }
 
 export function Dropzone({ health, healthError, onFiles, onSample }: DropzoneProps) {
+  const provider = health?.provider === 'openrouter' ? 'OpenRouter' : 'Gemini'
+  const keyName = health?.provider === 'openrouter' ? 'OPENROUTER_API_KEY' : 'GEMINI_API_KEY'
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const dragDepth = useRef(0)
@@ -63,8 +65,8 @@ export function Dropzone({ health, healthError, onFiles, onSample }: DropzonePro
             <em>handwriting.</em>
           </h1>
           <p className={styles.lede}>
-            A photo of your notes becomes clean, editable text in seconds. Then read it in
-            another language — without losing the shape, the math, or the meaning of the page.
+            A photo of your notes becomes clean, editable text in seconds. Then read it in another
+            language — without losing the shape, the math, or the meaning of the page.
           </p>
 
           <div className={styles.quickRow}>
@@ -103,21 +105,21 @@ export function Dropzone({ health, healthError, onFiles, onSample }: DropzonePro
               <ShieldCheck size={14} aria-hidden="true" /> Local history
             </span>
             <span>No server copies</span>
-            <span>Gemini multimodal</span>
+            <span>{provider} multimodal</span>
           </div>
         </section>
 
         <section className={styles.uploadColumn} aria-label="Upload a note">
           {health?.mode === 'mock' ? (
             <div className={`${styles.notice} ${styles.noticeDemo}`}>
-              <strong>Demo mode.</strong> OCR and translation are simulated until a Gemini key
-              is added.
+              <strong>Demo mode.</strong> OCR and translation are simulated until an API key is
+              added.
             </div>
           ) : null}
           {health?.mode === 'unconfigured' ? (
             <div className={styles.notice}>
-              <strong>Key needed.</strong> Add <code>GEMINI_API_KEY</code> to{' '}
-              <code>.env.local</code>, then restart the server.
+              <strong>Key needed.</strong> Add <code>{keyName}</code> to <code>.env.local</code>,
+              then restart the server.
             </div>
           ) : null}
           {healthError ? (
@@ -159,8 +161,7 @@ export function Dropzone({ health, healthError, onFiles, onSample }: DropzonePro
                 or choose a file.
               </h2>
               <p className={styles.dropCopy}>
-                One note or twenty. We’ll keep the order, read each page, and hand it back
-                editable.
+                One note or twenty. We’ll keep the order, read each page, and hand it back editable.
               </p>
 
               <input
@@ -212,16 +213,16 @@ export function Dropzone({ health, healthError, onFiles, onSample }: DropzonePro
               </div>
 
               <div className={styles.formats}>
-                JPG · PNG · WebP <span aria-hidden="true">/</span> up to {health?.maxUploadMb ?? 12} MB
-                each <span aria-hidden="true">/</span> 20 pages
+                JPG · PNG · WebP <span aria-hidden="true">/</span> up to {health?.maxUploadMb ?? 12}{' '}
+                MB each <span aria-hidden="true">/</span> 20 pages
               </div>
             </div>
           </div>
 
           <p className={styles.privacyNote}>
             <ShieldCheck size={13} aria-hidden="true" />
-            Images are sent to Google Gemini to be read. They are never stored on a Scripta
-            server. History stays in this browser.
+            Images are sent to {provider} to be read. They are never stored on a Scripta server.
+            History stays in this browser.
           </p>
         </section>
       </div>
